@@ -129,7 +129,7 @@ int main () {
                     int ms = MS[i] % 100;
                     if ( ms < 10 )
                         printf ( "0" );
-                    printf("%d ",  ms);
+                    printf ( "%d ",  ms);
 
                 }
                 printf ( "} " );
