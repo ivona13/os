@@ -113,7 +113,7 @@ void otkljucaj(int i) {
     broj[i] = 0;
 }
 
-/* create thread argument struct for thr_func() */
+// struktura za pohranu dretve
 typedef struct _thread_data_t {
     int id;
     int sleepsecond;
@@ -133,7 +133,7 @@ void *provjera_func(void *args) {
 
                       //  printf ( "\nI = %d, U = %d   ",  I % 5, (U + 1) % 5 );
                         printf ( "Dretva %d dohvatila broj %llu.\n", id, MS[I % 5] );
-                //bit(MS[I % 5]);
+                
                         index = I;
                         I ++;
 
@@ -143,15 +143,10 @@ void *provjera_func(void *args) {
 
                         sleep(5);
                         printf("Dretva %d potrošila broj %llu.\n", id, MS[index]);
-                // printf ( "} " );
-
-
-
-
+              
     }
 
-
-/* thread function */
+// thread funkcija
 void * thr_func(void * arg) {
 
     thread_data_t * data = (thread_data_t * ) arg;
@@ -159,7 +154,6 @@ void * thr_func(void * arg) {
     int id = data -> id;
     srand(time(NULL));
     zakljucaj(id);
-  //  printf("hello from thr_func, thread id: %d\n", data -> id);
 
     if(KRAJ) {
       pthread_exit(NULL);
@@ -210,13 +204,11 @@ void * thr_func(void * arg) {
 
 
 
-/*main thread function*/
+// funkcija za glavnu dretvu
 void * main_thr_func(void * arg) {
 
     while(!KRAJ) {
     thread_data_t * data = (thread_data_t * ) arg;
-
-    //printf("hello from main thread, thread id: %d\n", data -> id);
 
     int BROJ_DRETVI = data -> id;
     int second = data -> sleepsecond;
@@ -231,14 +223,13 @@ void * main_thr_func(void * arg) {
     ulaz = malloc(BROJ_DRETVI * sizeof( * ulaz));
     broj = malloc(BROJ_DRETVI * sizeof( * broj));
 
-
-    /*initialize Lamport's Bakery alg*/
+    // inicijalizaciaj Lamportovog algoritma
     for (i = 0; i < BROJ_DRETVI; ++i) {
         ulaz[i] = false;
         broj[i] = 0;
     }
-    //create thread with critical section
-    //other thread
+    // radne dretve
+ 
     for (i = 0; i < BROJ_DRETVI; ++i) {
         radna_dretva_data[i].id = i;
         if ((rc = pthread_create( & radna_dretva[i], NULL, thr_func, & radna_dretva_data[i]))) {
@@ -266,6 +257,8 @@ void * main_thr_func(void * arg) {
           broj_[i] = 0;
     }
     rc = 0;
+          
+    // dretve provjere
     for (i = 0; i < BROJ_DRETVI; ++i) {
         provjera_data[i].id = i;
         if ((rc = pthread_create( & provjera_dretva[i], NULL, provjera_func, & provjera_data[i]))) {
@@ -304,7 +297,7 @@ int main() {
     thread_data_t main_data;
 
 
-    //main thread
+    // glavna dretva
     main_data.id = BROJ_DRETVI;
     main_data.sleepsecond = sekunde;
     if ((rc = pthread_create( & main_thr, NULL, main_thr_func, & main_data))) {
