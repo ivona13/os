@@ -124,16 +124,19 @@ thread_data_t;
 void *provjera_func(void *args) {
 
 
+      while(KRAJ != 1) {
                 thread_data_t * data = (thread_data_t * ) args;
 
                 int id = data->id;
                 int index;
+                unsigned long long broj;
                 zakljucaj(id);
 
-
+                    if(MS[0] != 0) {
+                      broj = MS[0];
                       //  printf ( "\nI = %d, U = %d   ",  I % 5, (U + 1) % 5 );
-                        printf ( "Dretva %d dohvatila broj %llu.\n", id, MS[I % 5] );
-                
+                        printf ( "Dretva %d dohvatila broj %llu.\n", id, broj );
+
                         index = I;
                         I ++;
 
@@ -142,8 +145,9 @@ void *provjera_func(void *args) {
 
 
                         sleep(5);
-                        printf("Dretva %d potrošila broj %llu.\n", id, MS[index]);
-              
+                        printf("Dretva %d potrošila broj %llu.\n", id, broj);
+                      }
+          }
     }
 
 // thread funkcija
@@ -159,7 +163,7 @@ void * thr_func(void * arg) {
       pthread_exit(NULL);
     }
 
-
+    while(KRAJ != 1) {
         unsigned long long x = rnd() | 1ULL;
 
         int iteracija = MAX_ITERACIJA;
@@ -197,7 +201,7 @@ void * thr_func(void * arg) {
         MS[ U % 5 ] = x;
 
         otkljucaj(id);
-
+      }
 
     pthread_exit(NULL);
 }
@@ -229,7 +233,7 @@ void * main_thr_func(void * arg) {
         broj[i] = 0;
     }
     // radne dretve
- 
+
     for (i = 0; i < BROJ_DRETVI; ++i) {
         radna_dretva_data[i].id = i;
         if ((rc = pthread_create( & radna_dretva[i], NULL, thr_func, & radna_dretva_data[i]))) {
@@ -239,17 +243,6 @@ void * main_thr_func(void * arg) {
     }
 
 
-
-
-
-    for (i = 0; i < BROJ_DRETVI; ++i) {
-        pthread_join(radna_dretva[i], NULL);
-        if(KRAJ == 1)
-            break;
-    }
-
-
-
     ulaz_ = malloc(BROJ_DRETVI * sizeof( * ulaz_));
     broj_ = malloc(BROJ_DRETVI * sizeof( * broj_));
     for (i = 0; i < BROJ_DRETVI; ++i) {
@@ -257,7 +250,7 @@ void * main_thr_func(void * arg) {
           broj_[i] = 0;
     }
     rc = 0;
-          
+
     // dretve provjere
     for (i = 0; i < BROJ_DRETVI; ++i) {
         provjera_data[i].id = i;
@@ -267,6 +260,11 @@ void * main_thr_func(void * arg) {
         }
     }
 
+
+    sleep(30);
+
+
+   KRAJ = 1;
     for (i = 0; i < BROJ_DRETVI; ++i) {
         if(KRAJ == 1)
             break;
@@ -274,11 +272,14 @@ void * main_thr_func(void * arg) {
 
     }
 
+    for (i = 0; i < BROJ_DRETVI; ++i) {
+        pthread_join(radna_dretva[i], NULL);
+        if(KRAJ == 1)
+            break;
+    }
 
-    sleep(30);
 
 
-   KRAJ = 1;
 
 
   }
