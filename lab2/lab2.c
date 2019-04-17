@@ -144,7 +144,7 @@ void *provjera_func(void *args) {
                         otkljucaj(id);
 
 
-                        sleep(5);
+                        sleep(broj % 5);
                         printf("Dretva %d potrošila broj %llu.\n", id, broj);
                       }
           }
