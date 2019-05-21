@@ -95,9 +95,8 @@ void * provjera_func(void * args) {
 
     cekajSEM(dohvati);
 
-    if (MS[0] != 0 && last != MS[0]) {
-
-      broj = MS[0];
+    if (MS[I % 5] != 0 && last != MS[I % 5]) {
+      broj = MS[I % 5];
       last = broj;
       printf("Dretva %d dohvatila broj %llu.\n", id, broj);
 
@@ -125,41 +124,35 @@ void * thr_func(void * arg) {
 
   while (KRAJ != 1) {
 
-    for (int i = 0; i < 5; i++) {
+
       unsigned long long x = rnd() | 1ULL;
 
       int iteracija = MAX_ITERACIJA;
 
-      //unaprijed oznacen broj iteracija u kojima provjeravamo je li broj prost
-      // inace generiraj novi
+    //unaprijed oznacen broj iteracija u kojima provjeravamo je li broj prost
+    // inace generiraj novi
       while (!ispunjava_zahtjev(x) || !prost(x)) {
-
-        if (x <= 0xffffffffffffffffULL - 2) {
-          x += 2;
-          --iteracija;
-          if (!iteracija) {
-            iteracija = MAX_ITERACIJA;
-            x = rnd() | 1ULL;
-            break;
-
-          }
-
+      if (x <= 0xffffffffffffffffULL - 2) {
+        x += 2;
+        --iteracija;
+        if (!iteracija) {
+          iteracija = MAX_ITERACIJA;
+          x = rnd() | 1ULL;
+          break;
         }
 
-        x = rnd() | 1ULL;
-        iteracija = MAX_ITERACIJA;
-        continue;
       }
-
-      cekajSEM(generiraj);
-
-      MS[U % 5] = x;
-      U++;
-
-      postaviSEM(dohvati);
-
+      x = rnd() | 1ULL;
+      iteracija = MAX_ITERACIJA;
+      continue;
     }
+
+    cekajSEM(generiraj);
+    MS[U % 5] = x;
+    U++;
+    postaviSEM(dohvati);
   }
+
 
   pthread_exit(NULL);
 }
