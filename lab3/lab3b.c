@@ -10,21 +10,19 @@
 
 #include <stdbool.h>
 
-#include <semaphore.h>
-
-#include <math.h>
-
-
 pthread_mutex_t monitor;
 
 pthread_cond_t red[5];
 
 long last = 0;
 
+static int dohvacen = 0;
+
 // globalne varijable
 unsigned long long MS[5] = {
   (unsigned long long) 0
 };
+
 int I = 0, U = -1;
 int KRAJ = 0;
 int BROJ_DRETVI = 5;
@@ -81,28 +79,30 @@ thread_data_t;
 
 void * provjera_func(void * args) {
 
+  pthread_mutex_lock( & monitor);
+
   while (KRAJ != 1) {
-    thread_data_t * data = (thread_data_t * ) args;
+    if (dohvacen == 0) {
+      thread_data_t * data = (thread_data_t * ) args;
 
-    int id = data -> id;
-    int index;
-    unsigned long long broj;
+      int index;
+      unsigned long long broj;
 
-    pthread_mutex_lock( & monitor);
+      int id = data -> id;
+      while (MS[I % 5] == 0 || last == MS[I % 5])
+        pthread_cond_wait( & red[id], & monitor);
 
-    while (MS[I % 5] == 0 || last == MS[I % 5])
-      pthread_cond_wait( & red[id], & monitor);
+      broj = MS[I % 5];
+      last = broj;
+      printf("Dretva %d dohvatila broj %llu.\n", id, broj);
 
-    broj = MS[I % 5];
-    last = broj;
-    printf("Dretva %d dohvatila broj %llu.\n", id, broj);
+      I++;
 
-    I++;
+      printf("Dretva %d potrošila broj %llu.\n", id, broj);
+      dohvacen = 1;
+      pthread_mutex_unlock( & monitor);
 
-    printf("Dretva %d potrošila broj %llu.\n", id, broj);
-
-    pthread_mutex_unlock( & monitor);
-
+    }
   }
 }
 
@@ -146,6 +146,7 @@ void * thr_func(void * arg) {
     pthread_mutex_lock( & monitor);
     MS[U % 5] = x;
     U++;
+    dohvacen = 0;
     pthread_cond_signal( & red[id]);
     pthread_mutex_unlock( & monitor);
   }
